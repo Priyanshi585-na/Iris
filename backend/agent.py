@@ -3,7 +3,7 @@ from browser import BrowserController
 from vision import analyze_screenshot
 
 class IrisAgent:
-    def __int__(self):
+    def __init__(self):
         self.browser = BrowserController()
         self.step_history = []
         self.max_steps = 15
