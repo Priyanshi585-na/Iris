@@ -1,5 +1,5 @@
 playwright
-google-generativeai
+google-genai
 fastapi
 uvicorn
 websockets
