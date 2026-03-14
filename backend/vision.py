@@ -27,7 +27,7 @@ Look at this screenshot and decide the NEXT single action to take.
 Respond ONLY with a JSON object like this:
 {{
   "thought": "what you see and why you're taking this action",
-  "action": "click" | "type" | "navigate" | "scroll" | "done",
+  "action": "click" | "type" | "navigate" | "scroll" | "done" | "press_enter",
   "selector": "CSS selector of element to interact with (if click/type)",
   "text": "text to type (if action is type)",
   "url": "full url (if action is navigate)",
@@ -37,8 +37,11 @@ Respond ONLY with a JSON object like this:
 
 RULES:
 - One action at a time
+- ALWAYS navigate directly to the website URL, never use Google search
+- For Flipkart tasks start with action "navigate" to "https://www.flipkart.com"
+- For Amazon tasks start with action "navigate" to "https://www.amazon.in"
 - If task is complete, use action "done"
-- For search bars use action "type" then separate "click" for the button
+- For search bars use action "type" then press Enter key
 - Maximum 15 steps total
 - Be precise with CSS selectors
 """

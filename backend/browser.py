@@ -43,6 +43,7 @@ class BrowserController:
                 text = action.get("text")
                 await self.page.click(selector, timeout=15000)
                 await self.page.type(selector, text, delay=50)
+                await self.page.press(selector, "Enter")
                 await asyncio.sleep(0.5)
                 return f"Typed {text} in {selector}"
             
@@ -51,6 +52,12 @@ class BrowserController:
                 await self.page.click(selector, timeout=15000)
                 await asyncio.sleep(1)
                 return f"Clicked {selector}"
+            
+            elif act == "press_enter":
+                selector = action.get("selector", "body")
+                await self.page.press(selector, "Enter")
+                await asyncio.sleep(2)
+                return "Pressed Enter"
             
             elif act == "scroll":
                 direction = action.get("direction","down")
