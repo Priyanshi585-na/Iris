@@ -1,14 +1,16 @@
-import vertexai
-from vertexai.generative_models import GenerativeModel, Part
-import base64
+from google import genai
+from google.genai import types
 import json
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-vertexai.init(project="iris-agent-489709", location="us-central1")
-model = GenerativeModel("gemini-2.0-flash-001")
+client = genai.Client(
+    vertexai=True,
+    project="iris-agent-489709",
+    location="us-central1"
+)
 
 def analyze_screenshot(screenshot_bytes: bytes, task: str, step_history: list) -> dict:
     history_text = "\n".join(step_history[-5:]) if step_history else "No steps yet"
@@ -41,10 +43,13 @@ RULES:
 - Be precise with CSS selectors
 """
 
-    response = model.generate_content([
-        Part.from_data(data=screenshot_bytes, mime_type="image/png"),
-        prompt
-    ])
+    response = client.models.generate_content(
+        model="gemini-2.0-flash-001",
+        contents=[
+            types.Part.from_bytes(data=screenshot_bytes, mime_type="image/png"),
+            prompt
+        ]
+    )
 
     text = response.text.strip()
     text = text.replace("```json", "").replace("```", "").strip()
