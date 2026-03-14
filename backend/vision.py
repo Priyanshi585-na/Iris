@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 vertexai.init(project="iris-agent-489709", location="us-central1")
-model = GenerativeModel("gemini-2.0-flash")
+model = GenerativeModel("gemini-2.0-flash-001")
 
 def analyze_screenshot(screenshot_bytes: bytes, task: str, step_history: list) -> dict:
     history_text = "\n".join(step_history[-5:]) if step_history else "No steps yet"
