@@ -34,14 +34,14 @@ class BrowserController:
         try:
             if act == "navigate":
                 url = action.get("url")
-                await self.page.goto(url, wait_until="domcontentloaded", timeout=15000)
+                await self.page.goto(url, wait_until="domcontentloaded", timeout=25000)
                 await asyncio.sleep(2)
                 return f"Navigate to {url}"
             
             elif act == "type":
                 selector = action.get("selector")
                 text = action.get("text")
-                await self.page.click(selector, timeout=15000)
+                await self.page.click(selector, timeout=25000)
                 await self.page.type(selector, text, delay=50)
                 await self.page.press(selector, "Enter")
                 await asyncio.sleep(0.5)
@@ -49,7 +49,7 @@ class BrowserController:
             
             elif act == "click":
                 selector = action.get("selector")
-                await self.page.click(selector, timeout=15000)
+                await self.page.click(selector, timeout=25000)
                 await asyncio.sleep(1)
                 return f"Clicked {selector}"
             

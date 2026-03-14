@@ -42,6 +42,7 @@ RULES:
 - For Amazon tasks start with action "navigate" to "https://www.amazon.in"
 - If task is complete, use action "done"
 - For search bars use action "type" then press Enter key
+- You can use "scroll" if some buttons are not or partially visible to you.
 - Maximum 15 steps total
 - Be precise with CSS selectors
 """
