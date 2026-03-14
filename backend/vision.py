@@ -53,4 +53,8 @@ RULES:
 
     text = response.text.strip()
     text = text.replace("```json", "").replace("```", "").strip()
+    
+    start = text.find('{')
+    end = text.rfind('}') + 1
+    text = text[start:end]
     return json.loads(text)
