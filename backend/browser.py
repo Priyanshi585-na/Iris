@@ -28,54 +28,73 @@ class BrowserController:
     async def screenshot(self):
         return await self.page.screenshot(type="png")
     
-    async def execute_action(self, action):
+    async def execute_action(self, action: dict) -> str:
         act = action.get("action")
 
         try:
             if act == "navigate":
                 url = action.get("url")
-                await self.page.goto(url, wait_until="domcontentloaded", timeout=25000)
+                await self.page.goto(url, wait_until="domcontentloaded", timeout=15000)
                 await asyncio.sleep(2)
                 return f"Navigate to {url}"
-            
-            elif act == "type":
-                selector = action.get("selector")
-                text = action.get("text")
-                await self.page.click(selector, timeout=25000)
-                await self.page.type(selector, text, delay=50)
-                await self.page.press(selector, "Enter")
-                await asyncio.sleep(0.5)
-                return f"Typed {text} in {selector}"
-            
+
             elif act == "click":
+                x = action.get("x")
+                y = action.get("y")
                 selector = action.get("selector")
-                await self.page.click(selector, timeout=25000)
-                await asyncio.sleep(1)
-                return f"Clicked {selector}"
-            
-            elif act == "press_enter":
-                selector = action.get("selector", "body")
-                await self.page.press(selector, "Enter")
+
+                if x and y:
+                    await self.page.mouse.click(x, y)
+                    await asyncio.sleep(1)
+                    return f"Clicked at ({x}, {y})"
+                elif selector:
+                    # Fallback to selector
+                    await self.page.click(selector, timeout=5000)
+                    await asyncio.sleep(1)
+                    return f"Clicked {selector}"
+                else:
+                    return "No click target provided"
+
+            elif act == "type":
+                x = action.get("x")
+                y = action.get("y")
+                selector = action.get("selector")
+                text = action.get("text", "")
+
+                if x and y:
+                    await self.page.mouse.click(x, y)
+                    await asyncio.sleep(0.5)
+                elif selector:
+                    await self.page.click(selector, timeout=5000)
+                    await asyncio.sleep(0.5)
+
+                await self.page.keyboard.type(text, delay=50)
+                await asyncio.sleep(0.5)
+                await self.page.keyboard.press("Enter")
                 await asyncio.sleep(2)
-                return "Pressed Enter"
-            
+                return f"Typed '{text}' and pressed Enter"
+
             elif act == "scroll":
-                direction = action.get("direction","down")
+                direction = action.get("direction", "down")
                 delta = 500 if direction == "down" else -500
                 await self.page.mouse.wheel(0, delta)
                 await asyncio.sleep(1)
                 return f"Scrolled {direction}"
-            
+
+            elif act == "press_enter":
+                await self.page.keyboard.press("Enter")
+                await asyncio.sleep(2)
+                return "Pressed Enter"
+
             elif act == "done":
                 return "DONE"
-            
+
             else:
-                return f"Unknown act {act}"
-            
+                return f"Unknown action: {act}"
 
         except Exception as e:
-            return f"Action failed {e}"
-        
+            return f"Action failed {str(e)}"
+
     async def close(self):
         if self.browser:
             await self.browser.close()

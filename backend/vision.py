@@ -28,7 +28,9 @@ Respond ONLY with a JSON object like this:
 {{
   "thought": "what you see and why you're taking this action",
   "action": "click" | "type" | "navigate" | "scroll" | "done" | "press_enter",
-  "selector": "CSS selector of element to interact with (if click/type)",
+  "selector": "CSS selector (optional, use if obvious)",
+  "x": 640,
+  "y": 360,
   "text": "text to type (if action is type)",
   "url": "full url (if action is navigate)",
   "direction": "up" | "down" (if action is scroll),
@@ -40,6 +42,10 @@ RULES:
 - ALWAYS navigate directly to the website URL, never use Google search
 - For Flipkart tasks start with action "navigate" to "https://www.flipkart.com"
 - For Amazon tasks start with action "navigate" to "https://www.amazon.in"
+- For clicks, ALWAYS provide x and y coordinates of the element center
+- x and y are pixel coordinates on a 1280x720 screen
+- CSS selector is optional backup only
+- For typing, click the element first using coordinates, then type
 - If task is complete, use action "done"
 - For search bars use action "type" then press Enter key
 - You can use "scroll" if some buttons are not or partially visible to you.
