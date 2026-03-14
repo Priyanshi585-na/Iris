@@ -9,7 +9,7 @@ load_dotenv()
 client = genai.Client(
     vertexai=True,
     project="iris-agent-489709",
-    location="us-central1"
+    location="global"
 )
 
 def analyze_screenshot(screenshot_bytes: bytes, task: str, step_history: list) -> dict:
@@ -44,7 +44,7 @@ RULES:
 """
 
     response = client.models.generate_content(
-        model="gemini-2.0-flash-001",
+        model="gemini-2.5-flash",
         contents=[
             types.Part.from_bytes(data=screenshot_bytes, mime_type="image/png"),
             prompt
