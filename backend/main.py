@@ -1,3 +1,4 @@
+import httpx
 import base64
 import json
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -5,8 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from agent import IrisAgent
 from contextlib import asynccontextmanager
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from starlette.middleware.base import BaseHTTPMiddleware
+
 
 
 load_dotenv()
@@ -45,28 +47,35 @@ async def health():
     return {"status":"Iris is ready"}
 
 
+
+
 @app.get("/novnc", response_class=HTMLResponse)
 async def novnc():
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            * { margin: 0; padding: 0; }
-            body { background: #000; overflow: hidden; }
-            iframe { 
-                width: 100vw; 
-                height: 100vh; 
-                border: none; 
-                display: block;
-            }
-        </style>
-    </head>
-    <body>
-        <iframe src="http://localhost:6080/vnc.html?autoconnect=true&reconnect=true&resize=scale&show_dot=true&password="></iframe>
-    </body>
-    </html>
-    """
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            "http://localhost:6080/vnc.html",
+            headers={"ngrok-skip-browser-warning": "true"}
+        )
+        content = response.text
+        # Fix relative URLs to point back through our proxy
+        content = content.replace('src="', 'src="/novnc-static/')
+        content = content.replace('href="', 'href="/novnc-static/')
+        return HTMLResponse(content)
+
+@app.get("/novnc-static/{path:path}")
+async def novnc_static(path: str):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"http://localhost:6080/{path}",
+            headers={"ngrok-skip-browser-warning": "true"}
+        )
+        return Response(
+            content=response.content,
+            media_type=response.headers.get("content-type", "text/plain")
+        )
+
+
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
