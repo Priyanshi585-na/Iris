@@ -78,7 +78,7 @@ class IrisAgent:
                     await self.browser.execute_action({
                         "action":"navigate",
                         "url": await self.browser.get_current_url()
-                    })
+                    }, elements)
                     self.step_history.append("Loop detected - page refreshed")
                     
             await asyncio.sleep(1)
