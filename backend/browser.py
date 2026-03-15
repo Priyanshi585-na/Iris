@@ -28,6 +28,9 @@ class BrowserController:
     async def screenshot(self):
         return await self.page.screenshot(type="png")
     
+    async def get_current_url(self):
+        return self.page.url
+    
     async def execute_action(self, action: dict) -> str:
         act = action.get("action")
 

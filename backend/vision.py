@@ -40,10 +40,7 @@ Respond ONLY with a JSON object like this:
 RULES:
 - One action at a time
 - ALWAYS navigate directly to the website URL, never use Google search
-- For Flipkart tasks start with action "navigate" to "https://www.flipkart.com"
-- For Amazon tasks start with action "navigate" to "https://www.amazon.in"
 - For clicks, ALWAYS provide x and y coordinates of the element center
-- x and y are pixel coordinates on a 1280x720 screen
 - CSS selector is optional backup only
 - For typing, click the element first using coordinates, then type
 - If task is complete, use action "done"
@@ -58,13 +55,30 @@ RULES:
         contents=[
             types.Part.from_bytes(data=screenshot_bytes, mime_type="image/png"),
             prompt
-        ]
+        ],
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            response_schema={
+                "type":"OBJECT",
+                "properties":{
+                    "thought": {"type": "STRING"},
+                    "action": {
+                        "type": "STRING",
+                        "enum": ["navigate", "click", "type", "scroll", "done"]
+                    },
+                    "x": {"type": "INTEGER"},
+                    "y": {"type": "INTEGER"},
+                    "text": {"type": "STRING"},
+                    "url": {"type": "STRING"},
+                    "direction": {
+                        "type": "STRING",
+                        "enum": ["up", "down"]
+                    },
+                    "result": {"type": "STRING"}
+                },
+                "required": ["thought", "action"]
+            }
+        )
     )
 
-    text = response.text.strip()
-    text = text.replace("```json", "").replace("```", "").strip()
-    
-    start = text.find('{')
-    end = text.rfind('}') + 1
-    text = text[start:end]
-    return json.loads(text)
+    return json.loads(response.text)

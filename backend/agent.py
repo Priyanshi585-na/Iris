@@ -60,6 +60,21 @@ class IrisAgent:
 
             outcome = await self.browser.execute_action(action)
             print(f"Outcome: {outcome}")
+
+            self.step_history.append(
+                f"Step {step + 1}: {thought} -> {act} -> Result: {outcome}"
+            )
+
+            if(len(self.step_history)>=4):
+                last_4 = [h.split('->')[1].strip() for h in self.step_history[-4:]]
+                if len(set(last_4)) == 1:
+                    print("Loop detected, forcing navigate to restart")
+                    await self.browser.execute_action({
+                        "action":"navigate",
+                        "url": await self.browser.get_current_url()
+                    })
+                    self.step_history.append("Loop detected - page refreshed")
+                    
             await asyncio.sleep(1)
         
         self.running = False
