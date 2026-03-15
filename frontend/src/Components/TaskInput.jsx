@@ -4,8 +4,8 @@ import '../App.css'
 const SUGGESTIONS = [
   'Search best laptops under ₹50,000 on Flipkart',
   'Go to Wikipedia and summarize Quantum Computing',
-  'Find top rated restaurants in Mumbai on Zomato',
-  'Search for iPhone 16 price on Amazon India',
+  'Find restaurants in Mumbai on Zomato',
+  'Search for iPhone 16 on Amazon India',
 ]
 
 export default function TaskInput({ onRun, onStop, running, connected, result }) {
