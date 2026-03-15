@@ -1,4 +1,3 @@
-import asyncio
 import base64
 import json
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -7,11 +6,20 @@ from dotenv import load_dotenv
 from agent import IrisAgent
 from contextlib import asynccontextmanager
 from fastapi.responses import HTMLResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 
 load_dotenv()
 
 app = FastAPI()
+
+class NgrokMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["ngrok-skip-browser-warning"] = "true"
+        return response
+
+app.add_middleware(NgrokMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -59,8 +67,6 @@ async def novnc():
     </body>
     </html>
     """
-
-
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
