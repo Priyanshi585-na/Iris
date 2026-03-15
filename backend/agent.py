@@ -25,9 +25,10 @@ class IrisAgent:
                 break
 
             screenshot = await self.browser.screenshot()
+            ax_tree, elements = await self.browser.get_ax_tree()
 
             try:
-                action = analyze_screenshot(screenshot, task, self.step_history)
+                action = analyze_screenshot(screenshot, task, self.step_history, ax_tree)
             
             except Exception as e:
                 print(f"Error {e}")
@@ -58,7 +59,7 @@ class IrisAgent:
                     })
                 break
 
-            outcome = await self.browser.execute_action(action)
+            outcome = await self.browser.execute_action(action, elements)
             print(f"Outcome: {outcome}")
 
             self.step_history.append(

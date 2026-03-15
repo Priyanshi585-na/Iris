@@ -30,52 +30,78 @@ class BrowserController:
     
     async def get_current_url(self):
         return self.page.url
+
+
+    async def get_ax_tree(self):
+        elements = await self.page.evaluate(
+            """
+    () => {
+      const interactive = [];
+      const selector = 'a,button, input, textarea, select, [role="button"],[role="link"],[role="textbox], [onclick]';
+      const els = document.querySelectorAll(selector);
+      
+      els.forEach((el, i) => {
+      const rect = el.getBoundingClientRect();
+      if(rect.width > 0 && rect.height > 0 && rect.top>=0 && rect.top <= window.innerHeight){
+
+      const label = el.getAttribute('aria-label')|| el.getAttribute('placeholder') || el.getAttribute('title') || el.getAttribute('name') || el.innerText?.trim().slice(0,50) || el.tagName.toLowerCase();
+
+      interactive.push({
+        id: i+1,
+        tag: el.tagName.toLowerCase(),
+        label: label,
+        x: Math.round(rect.x + rect.width/2),
+        y: Math.round(rect.y + rect.height/2),
+        type: el.getAttribute('type') || ''
+      });
+      }
+    });
+    return interactive;
+    }
+""")
+        
+        tree = "INTERACTIVE ELEMENTS ON PAGE:\n"
+        for el in elements[:50]:
+            tree += f"[{el['id']}] {el['tag']} \"{el['label']}\" at (et{el['x']}, {el['y']})\n"
+
+        return tree, elements
+
+
     
-    async def execute_action(self, action: dict) -> str:
+    async def execute_action(self, action, elements):
         act = action.get("action")
+        element_id = action.get("element_id")
 
         try:
+            if element_id and elements:
+                el = next((e for e in elements if e['id'] == element_id), None)
+                if el:
+                    x, y = el['x'], el['y']
+            else:
+                x = action.get("x")
+                y = action.get("y")
+
             if act == "navigate":
                 url = action.get("url")
                 await self.page.goto(url, wait_until="domcontentloaded", timeout=15000)
                 await asyncio.sleep(2)
                 return f"Navigate to {url}"
+            
 
             elif act == "click":
-                x = action.get("x")
-                y = action.get("y")
-                selector = action.get("selector")
-
-                if x and y:
-                    await self.page.mouse.click(x, y)
-                    await asyncio.sleep(1)
-                    return f"Clicked at ({x}, {y})"
-                elif selector:
-                    # Fallback to selector
-                    await self.page.click(selector, timeout=5000)
-                    await asyncio.sleep(1)
-                    return f"Clicked {selector}"
-                else:
-                    return "No click target provided"
+                await self.page.mouse.click(x,y)
+                await asyncio.sleep(1)
+                return f"Clicked [{element_id} at ({x},{y})]"
 
             elif act == "type":
-                x = action.get("x")
-                y = action.get("y")
-                selector = action.get("selector")
+                await self.page.mouse.click(x,y)
+                await asyncio.sleep(0.5)
                 text = action.get("text", "")
-
-                if x and y:
-                    await self.page.mouse.click(x, y)
-                    await asyncio.sleep(0.5)
-                elif selector:
-                    await self.page.click(selector, timeout=5000)
-                    await asyncio.sleep(0.5)
-
-                await self.page.keyboard.type(text, delay=50)
+                await self.page.keyboard.type(text)
                 await asyncio.sleep(0.5)
                 await self.page.keyboard.press("Enter")
                 await asyncio.sleep(2)
-                return f"Typed '{text}' and pressed Enter"
+                return f"Typed '{text}'"
 
             elif act == "scroll":
                 direction = action.get("direction", "down")

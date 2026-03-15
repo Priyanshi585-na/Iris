@@ -12,7 +12,7 @@ client = genai.Client(
     location="global"
 )
 
-def analyze_screenshot(screenshot_bytes: bytes, task: str, step_history: list) -> dict:
+def analyze_screenshot(screenshot_bytes, task, step_history, ax_tree):
     history_text = "\n".join(step_history[-5:]) if step_history else "No steps yet"
 
     prompt = f"""You are Iris, an AI web agent. You control a real browser to complete tasks.
@@ -21,6 +21,8 @@ CURRENT TASK: {task}
 
 STEPS TAKEN SO FAR:
 {history_text}
+
+{ax_tree}
 
 Look at this screenshot and decide the NEXT single action to take.
 
