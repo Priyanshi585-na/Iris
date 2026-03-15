@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from agent import IrisAgent
 from contextlib import asynccontextmanager
+from fastapi.responses import HTMLResponse
 
 
 load_dotenv()
@@ -34,6 +35,31 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/health")
 async def health():
     return {"status":"Iris is ready"}
+
+
+@app.get("/novnc", response_class=HTMLResponse)
+async def novnc():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            * { margin: 0; padding: 0; }
+            body { background: #000; overflow: hidden; }
+            iframe { 
+                width: 100vw; 
+                height: 100vh; 
+                border: none; 
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <iframe src="http://localhost:6080/vnc.html?autoconnect=true&reconnect=true&resize=scale&show_dot=true&password="></iframe>
+    </body>
+    </html>
+    """
+
 
 
 @app.websocket("/ws")

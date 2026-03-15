@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import BrowserStream from './Components/Browser'
 import ThoughtLog from './Components/Thoughtlog'
 import TaskInput from './Components/TaskInput'
+import logo from '/iris.svg'
 
-const WS_URL = 'ws://34.58.18.57:8000/ws'
-const NOVNC_URL = 'http://34.58.18.57:6080/vnc.html?autoconnect=true&reconnect=true&resize=scale&show_dot=true'
+const WS_URL = 'wss://trena-statistical-zander.ngrok-free.dev/ws'
+const NOVNC_URL = 'https://trena-statistical-zander.ngrok-free.dev/novnc'
 
 export default function App() {
   const [connected, setConnected] = useState(false)
@@ -78,7 +79,13 @@ export default function App() {
       {/* Header */}
       <header className="iris-header">
         <div className="iris-logo">
-          <div className="iris-eye">👁️</div>
+          <div className="iris-eye-container">
+            <div className="iris-eye-ring" />
+            <div className="iris-eye-ring iris-eye-ring--2" />
+            <div className="iris-eye-core">
+              <img src={logo} alt="Iris" className="logo" />
+            </div>
+          </div>
           <div>
             <div className="iris-logo-text">Iris</div>
           </div>
@@ -90,15 +97,11 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main */}
       <main className="iris-main">
-        {/* Left: Browser Stream */}
         <BrowserStream url={NOVNC_URL} running={running} />
 
-        {/* Right: Thought Log */}
         <ThoughtLog thoughts={thoughts} running={running} />
 
-        {/* Right Bottom: Task Input */}
         <TaskInput
           onRun={runTask}
           onStop={stopTask}
