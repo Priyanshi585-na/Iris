@@ -5,7 +5,7 @@ import TaskInput from './Components/TaskInput'
 import logo from '/iris.svg'
 
 const WS_URL = 'wss://trena-statistical-zander.ngrok-free.dev/ws'
-const NOVNC_URL = 'https://trena-statistical-zander.ngrok-free.dev/novnc'
+const NOVNC_URL = 'https://trena-statistical-zander.ngrok-free.dev/novnc?autoconnect=true&reconnect=true&resize=scale'
 
 export default function App() {
   const [connected, setConnected] = useState(false)

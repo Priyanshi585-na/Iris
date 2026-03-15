@@ -1,6 +1,7 @@
 import httpx
 import base64
 import json
+import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -125,5 +126,23 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         print("Frontend disconnected")
         agent.stop()
+
+
+@app.websocket("/websockify")
+async def websockify_proxy(websocket: WebSocket):
+    await websocket.accept(subprotocol="binary")
+    import websockets
+    async with websockets.connect("ws://localhost:5900") as vnc_ws:
+        async def forward_to_vnc():
+            while True:
+                data = await websocket.receive_bytes()
+                await vnc_ws.send(data)
+        
+        async def forward_to_client():
+            while True:
+                data = await vnc_ws.recv()
+                await websocket.send_bytes(data if isinstance(data, bytes) else data.encode())
+        
+        await asyncio.gather(forward_to_vnc(), forward_to_client())
 
 
