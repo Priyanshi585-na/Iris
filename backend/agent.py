@@ -63,11 +63,16 @@ class IrisAgent:
             print(f"Outcome: {outcome}")
 
             self.step_history.append(
-                f"Step {step + 1}: {thought} -> {act} -> Result: {outcome}"
+                f"Step {step + 1}: {thought} → {act} → Result: {outcome}"
             )
 
             if(len(self.step_history)>=4):
-                last_4 = [h.split('->')[1].strip() for h in self.step_history[-4:]]
+                last_4 = []
+                for h in self.step_history[-4:]:
+                   parts = h.split('→')
+                   if len(parts) > 1:
+                       last_4.append(parts[1].strip())
+
                 if len(set(last_4)) == 1:
                     print("Loop detected, forcing navigate to restart")
                     await self.browser.execute_action({
