@@ -4,8 +4,8 @@ import ThoughtLog from './Components/Thoughtlog'
 import TaskInput from './Components/TaskInput'
 import logo from '/iris.svg'
 
-const WS_URL = 'wss://trena-statistical-zander.ngrok-free.dev/ws'
-const NOVNC_URL = 'https://trena-statistical-zander.ngrok-free.dev/novnc?autoconnect=true&reconnect=true&resize=scale'
+const WS_URL = 'ws://34.58.18.57:8000/ws'
+const NOVNC_URL = 'http://34.58.18.57:6080/vnc.html?autoconnect=true&reconnect=true&resize=scale&show_dot=false'
 
 export default function App() {
   const [connected, setConnected] = useState(false)

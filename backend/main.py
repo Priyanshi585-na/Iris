@@ -1,13 +1,9 @@
-import httpx
 import base64
 import json
 import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, Response
-from fastapi.staticfiles import StaticFiles
-from starlette.middleware.base import BaseHTTPMiddleware
 from dotenv import load_dotenv
 from agent import IrisAgent
 
@@ -24,13 +20,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-class NgrokMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        response = await call_next(request)
-        response.headers["ngrok-skip-browser-warning"] = "true"
-        return response
-
-app.add_middleware(NgrokMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -38,29 +27,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/novnc-app", StaticFiles(directory="novnc_static", html=True), name="novnc")
-
 @app.get("/health")
 async def health():
     return {"status": "Iris is ready"}
-
-@app.get("/novnc", response_class=HTMLResponse)
-async def novnc():
-    return f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            * {{ margin: 0; padding: 0; }}
-            body {{ background: #000; overflow: hidden; }}
-            iframe {{ width: 100vw; height: 100vh; border: none; }}
-        </style>
-    </head>
-    <body>
-        <iframe src="/novnc-app/vnc.html?host=trena-statistical-zander.ngrok-free.dev&port=443&path=websockify&encrypt=1&autoconnect=true&reconnect=true&resize=scale"></iframe>
-    </body>
-    </html>
-    """
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -109,20 +78,3 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         print("Frontend disconnected")
         agent.stop()
-
-@app.websocket("/websockify")
-async def websockify_proxy(websocket: WebSocket):
-    await websocket.accept(subprotocol="binary")
-    import websockets
-    async with websockets.connect("ws://localhost:5900") as vnc_ws:
-        async def forward_to_vnc():
-            while True:
-                data = await websocket.receive_bytes()
-                await vnc_ws.send(data)
-
-        async def forward_to_client():
-            while True:
-                data = await vnc_ws.recv()
-                await websocket.send_bytes(data if isinstance(data, bytes) else data.encode())
-
-        await asyncio.gather(forward_to_vnc(), forward_to_client())
